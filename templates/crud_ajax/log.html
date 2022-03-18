@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Django Ajax CRUD{% endblock %}
+  <style>
+    
+    .pagination { display: inline-block;}
+    .pagination a { color: black; float: left; padding: 8px 16px; text-decoration: none;}
+    .pagination a.active { background-color: #4CAF50; color: white;}
+    .pagination a:hover:not(.active) {background-color: #ddd;}
+    .pagination { display: inline-block;}
+    .pagination li { color: black; float: left; padding: 8px 16px; text-decoration: none;}
+    .pagination li.active { background-color: #4CAF50; color: white;}
+    .pagination li:hover:not(.active) {background-color: #ddd;}
+
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+{% block content %}
+
+
+<div class="container">
+    <h1>CRUD APPLICATION - LOGS</h1>
+
+
+      <div>
+        <table id="showlogs" class="table table-striped">
+          <h3>LOGS</h3>
+          <tr>
+            <th>Action</th>
+            <th>Affected User Id</th>
+            <th>Time</th>
+          </tr>
+          {% for log in logdata %}
+          <tr id="log-{{log.id}}">
+              <td class="logAction logData" name="action">{{log.action}}</td>
+              <td class="logId logData" name="id">{{log.id}}</td>
+              <td class="logTime logData" name="time">{{log.time}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="text-center">
+          <ul class="pagination">
+              <li name="1" style="margin-left: 5px;">1</li>
+              <li name="2" style="margin-left: 5px;">2</li>
+              <li name="3" style="margin-left: 5px;">3</li>
+              <li name="4" style="margin-left: 5px;">4</li>
+              <li name="5" style="margin-left: 5px;">5</li>
+          </ul>
+      </div>
+
+      <div class="pagination">
+      {% for i in page_range %}
+      <a style="margin-left: 5px;" href="{{i}}">{{i}}</a>
+      {% endfor %}
+      </div>
+</div>
+{% endblock %}
+{% block javascript %}
+<script>
+
+// ajax function to show the paginated view of all the logs of reqests made on the main page
+//$(document).ready(function(){
+$('li').click(function(event){
+  // preventing default actions
+  event.preventDefault();
+  var page_no = $(this).attr('name');
+  // ajax call
+  if (page_no){
+    $.ajax({
+        type: "POST",
+        // define url name
+        url: '{% url "logs_ajax" %}', 
+        data : {    
+        page_no : page_no, 
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      },
+      // handle a successful response
+      success: function (response) {
+        $("#showlogs").find("tr:not(:first)").remove();
+        $.each(response.results, function(i, logdata) {
+         //append to post
+        $("#showlogs").append(`
+              <tr id="log-${logdata.id}">
+                  <td class="logAction" name="action">${logdata.action}</td>
+                  <td class="logId" name="id">${logdata.id}</td>
+                  <td class="logTime" name="time">${logdata.time}</td>
+              </tr>
+          `);
+      });
+      },
+      error: function () {
+        alert('Error Occured');
+      }
+    }); 
+  } else{
+    alert("somethings wrong");
+  }
+});   
+
+</script>
+{% endblock javascript %}

@@ -1,0 +1,528 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Django Ajax CRUD{% endblock %}
+  <style>
+    
+    .pagination { display: inline-block;}
+    .pagination a { color: black; float: left; padding: 8px 16px; text-decoration: none;}
+    .pagination a.active { background-color: #4CAF50; color: white;}
+    .pagination a:hover:not(.active) {background-color: #ddd;}
+    .pagination { display: inline-block;}
+    .pagination li { color: black; float: left; padding: 8px 16px; text-decoration: none;}
+    .pagination li.active { background-color: #4CAF50; color: white;}
+    .pagination li:hover:not(.active) {background-color: #ddd;}
+
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+{% block content %}
+
+
+<div class="container">
+    <h1>CRUD APPLICATION</h1>
+      <div>
+        <table id="showusers" class="table table-striped">
+          <h3>USERS</h3>
+          <tr>
+            <th>Id</th>
+            <th>UserName</th>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+          </tr>
+          {% for user in first_page %}
+          <tr id="user-{{user.id}}">
+
+              <td class="userId userData" name="id">{{user.id}}</td>
+              <td class="userUserName userData" name="username">{{user.username}}</td>
+              <td class="userFirstName userData" name="firstname">{{user.firstname}}</td>
+              <td class="userLastName userData" name="lastname">{{user.lastname}}</td>
+              <td class="userEmail userData" name="email">{{user.email}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="text-center">
+          <ul class="pagination">
+              <li name="1" style="margin-left: 5px;">1</li>
+              <li name="2" style="margin-left: 5px;">2</li>
+              <li name="3" style="margin-left: 5px;">3</li>
+              <li name="4" style="margin-left: 5px;">4</li>
+              <li name="5" style="margin-left: 5px;">5</li>
+          </ul>
+      </div>
+
+      <div class="pagination">
+      {% for i in page_range %}
+      <a style="margin-left: 5px;" href="{{i}}">{{i}}</a>
+      {% endfor %}
+      </div>
+
+
+
+    <div class="btn-toolbar">
+
+      <form id="GET_button" action="" method='GET'>
+      <button type='button' class="btn btn-primary">GET</button>
+      </form>
+      <form id="POST_button" action="" method='GET'>
+      <button type='button' class="btn btn-primary">POST</button>
+      </form>
+      <form id="PUT_button" action="" method='GET'>
+      <button type='button' class="btn btn-primary">PUT</button>
+      </form>
+      <form id="DELETE_button" action="" method='GET'>
+      <button type='button' class="btn btn-primary">DELETE</button>
+      </form>
+      <form id="LOG_button" action="" method='GET'>
+      <a href="{% url 'logs' %}">
+      <button type='button' class="btn btn-primary">LOGS</button>
+      </a>
+      </form>
+
+    </div>
+
+    <div class="row">
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 ">
+
+        <form id="request" action="">
+          <h3>REQUEST</h3>
+        </form>
+
+        <form id="getUser" action="">
+          <h3>GET USER</h3>
+          <div class="form-group">
+            <label for="id">Id</label>
+            <input class="form-control" id="form-id" type="text" name="formId1">
+          </div>
+          <button class="btn btn-primary form-control" type="submit">GET DATA</button>
+        </form>
+
+        <form id="addUser" action="">
+          <h3>ADD USER</h3>
+          <div class="form-group">
+            <input class="form-control" type="text" name="username" placeholder="UserName" required>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="text" name="firstname" placeholder="FirstName" required>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="text" name="lastname" placeholder="LastName" required>
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="text" name="email" placeholder="Email" required>
+          </div>
+          <button class="btn btn-primary form-control" type="submit">SUBMIT</button>
+        </form>
+
+        <form id="updateUser" action="">
+          <h3>UPDATE USER</h3>
+          <div class="form-group">
+            <label for="id">Id</label>
+            <input class="form-control" id="form-id" type="text" name="formId"/>
+
+            <label for="username">UserName</label>
+            <input class="form-control" id="form-username" type="text" name="formUser"/>
+
+            <label for="firstname">FirstName</label>
+            <input class="form-control" id="form-firstname" type="text" name="formFirst"/>
+
+            <label for="lastname">LastName</label>
+            <input class="form-control" id="form-lastname" type="text" name="formLast"/>
+
+            <label for="email">Email</label>
+            <input class="form-control" id="form-email" type="text" name="formEmail">
+
+          </div>
+          <button type="submit" class="btn btn-primary form-control">Save changes</button>
+        </form>
+
+
+        <form id="deleteUser" action="">
+          <h3>DELETE USER</h3>
+          <div class="form-group">
+            <label for="id">Id</label>
+            <input class="form-control" id="form-id" type="text" name="formId2">
+          </div>
+          <button class="btn btn-danger form-control" type="submit">Delete</button>
+        </form>
+      </div>
+
+
+      <div class="col-md-8">
+        <table id="userTable" class="table table-striped">
+          <tr>
+            <th>Id</th>
+            <th>UserName</th>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+          </tr>
+          {% if users %}
+          {% for user in users %}
+          <tr id="user-{{user.id}}">
+
+              <td class="userId userData" name="id">{{user.id}}</td>
+              <td class="userUserName userData" name="username">{{user.username}}</td>
+              <td class="userFirstName userData" name="firstname">{{user.firstname}}</td>
+              <td class="userLastName userData" name="lastname">{{user.lastname}}</td>
+              <td class="userEmail userData" name="email">{{user.email}}</td>
+          </tr>
+          {% endfor %}
+          {% else %}
+            
+          {% endif %}
+        </table>
+      </div>
+
+      <div class="col-md-8">
+        <table id="showResponseTable" class="table table-striped">
+          <h3>RESPONSE</h3>
+          <tr>
+            <th>Id</th>
+            <th>UserName</th>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+          </tr>
+          {% if users %}
+          {% for user in users %}
+          <tr id="user-{{user.id}}">
+
+              <td class="userId userData" name="idres">{{user.id}}</td>
+              <td class="userUserName userData" name="usernameres">{{user.username}}</td>
+              <td class="userFirstName userData" name="firstnameres">{{user.firstname}}</td>
+              <td class="userLastName userData" name="lastnameres">{{user.lastname}}</td>
+              <td class="userEmail userData" name="emailres">{{user.email}}</td>
+          </tr>
+          {% endfor %}
+          {% else %}            
+          {% endif %}
+
+        </table>
+      </div>
+
+
+
+    </div>
+  </div>
+{% endblock %}
+{% block javascript %}
+<script>
+
+
+// initially hide all the forms and tables
+$(document).ready(function(){
+    $('#userTable').hide();
+    $("#getUser").hide();
+    $("#addUser").hide();
+    $("#updateUser").hide();
+    $("#deleteUser").hide();
+    $("#showResponseTable").hide();
+});
+
+// show form only for GET user functionality, and hide all other
+$(document).ready(function(){
+  $("#GET_button").click(function(){
+    $('#userTable').hide();
+    $("#getUser").show();
+    $("#addUser").hide();
+    $("#updateUser").hide();
+    $("#deleteUser").hide();
+    $("#showResponseTable").hide();
+  });
+});
+
+// show form only for ADD user functionality, and hide all other
+$(document).ready(function(){
+  $("#POST_button").click(function(){
+    $('#userTable').hide();
+    $("#getUser").hide();
+    $("#addUser").show();
+    $("#updateUser").hide();
+    $("#deleteUser").hide();
+    $("#showResponseTable").hide();  
+  });
+});
+
+// show form only for UPDATE user functionality, and hide all other
+$(document).ready(function(){
+  $("#PUT_button").click(function(){
+    $('#userTable').hide();
+    $("#getUser").hide();
+    $("#addUser").hide();
+    $("#updateUser").show();
+    $("#deleteUser").hide();
+    $("#showResponseTable").hide();    
+  });
+});
+
+// show form only for DELETE user functionality, and hide all other
+$(document).ready(function(){
+  $("#DELETE_button").click(function(){
+    $('#userTable').hide();
+    $("#getUser").hide();
+    $("#addUser").hide();
+    $("#updateUser").hide();
+    $("#deleteUser").show();
+    $("#showResponseTable").hide();
+  });
+});
+
+
+// ajax function to show the paginated view of all the users details
+$('li').click(function(event){
+  // preventing default actions
+  event.preventDefault();
+  var page_no = $(this).attr('name');
+  // ajax call
+  if (page_no){
+    $.ajax({
+        type: "POST",
+        // define url name
+        url: '{% url "crud_ajax_display" %}', 
+        data : {    
+        page_no : page_no, 
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      },
+      // handle a successful response
+      success: function (response) {
+        $("#showusers").find("tr:not(:first)").remove();
+        $.each(response.results, function(i, user) {
+         //append to entries to show on the new page
+        $("#showusers").append(`
+              <tr id="user-${user.id}">
+                  <td class="userId" name="idd">${user.id}</td>
+                  <td class="userUserName" name="usernamed">${user.username}</td>
+                  <td class="userFirstName" name="firstnamed">${user.firstname}</td>
+                  <td class="userLastName" name="lastnamed">${user.lastname}</td>
+                  <td class="userEmail" name="emaild">${user.email}</td>
+              </tr>
+          `);
+      });
+      },
+      error: function () {
+        alert('No Data Found');
+      }
+    }); 
+  } else{
+    alert("somethings wrong");
+  }
+});   
+
+
+// ajax function call to submit the user details of NEW user and insert it into the database
+$("form#addUser").submit(function() {
+    var usernameInput = $('input[name="username"]').val().trim();
+    var firstnameInput = $('input[name="firstname"]').val().trim();
+    var lastnameInput = $('input[name="lastname"]').val().trim();
+    var emailInput  = $('input[name="email"]').val().trim();
+    if (usernameInput && firstnameInput && lastnameInput && emailInput) {
+        $.ajax({
+            url: '{% url "crud_ajax_create" %}',
+            data: {
+                'username': usernameInput,
+                'firstname': firstnameInput,
+                'lastname': lastnameInput,
+                'email': emailInput
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data) {
+                  appendToUsrTable(data.user);
+                  //$('#userTable').show();
+                  $('#showResponseTable').show();
+
+                }
+            }
+        });
+      } else {
+        alert("All fields must have a valid value.");
+    }
+    $('form#addUser').trigger("reset");
+    return false;
+});
+
+
+// function to append the user details of the newly added user in userTable.
+// also update the showResponseTable with only the ADD user response
+function appendToUsrTable(user) {
+  $("#userTable > tbody:last-child").append(`
+        <tr id="user-${user.id}">
+            <td class="userId" name="id">${user.id}</td>
+            <td class="userUserName" name="username">${user.username}</td>
+            <td class="userFirstName" name="firstname">${user.firstname}</td>
+            <td class="userLastName" name="lastname">${user.lastname}</td>
+            <td class="userEmail" name="email">${user.email}</td>
+        </tr>
+    `);
+
+  $("#showResponseTable").find("tr:not(:first)").remove();
+
+  $("#showResponseTable").append(`
+        <tr id="user-${user.id}">
+            <td class="userId" name="idres">${user.id}</td>
+            <td class="userUserName" name="usernameres">${user.username}</td>
+            <td class="userFirstName" name="firstnameres">${user.firstname}</td>
+            <td class="userLastName" name="lastnameres">${user.lastname}</td>
+            <td class="userEmail" name="emailres">${user.email}</td>
+        </tr>
+    `);
+
+
+}
+
+// ajax function call to submit the user details of user to be updated and insert udpated details it into the database
+$("form#updateUser").submit(function() {
+    var idInput = $('input[name="formId"]').val().trim();
+    var usernameInput = $('input[name="formUser"]').val().trim();
+    var firstnameInput = $('input[name="formFirst"]').val().trim();
+    var lastnameInput = $('input[name="formLast"]').val().trim();
+    var emailInput = $('input[name="formEmail"]').val().trim();
+    if (usernameInput && firstnameInput && lastnameInput && emailInput) {
+        // Create Ajax Call
+        $.ajax({
+            url: '{% url "crud_ajax_update" %}',
+            data: {
+                'id': idInput,
+                'username': usernameInput,
+                'firstname': firstnameInput,
+                'lastname': lastnameInput,
+                'email': emailInput,
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.user) {
+                  updateToUserTabel(data.user);
+                  //$('#userTable').show();
+                  $('#showResponseTable').show();
+                }
+            }
+        });
+       } else {
+        alert("All fields must have a valid value.");
+    }
+    $('form#updateUser').trigger("reset");
+    $('#myModal').modal('hide');
+    return false;
+});
+
+// function to udpated the user details of the updated user in userTable.
+// also update the showResponseTable with only the UPDATED user response
+function updateToUserTabel(user){
+
+//    $("#userTable #user-" + user.id).children(".userData").each(function() {
+//        var attr = $(this).attr("name");
+//        if (attr == "username") {
+//          $(this).text(user.username);
+//        } else if (attr == "firstname") {
+//          $(this).text(user.firstname);
+//        } else if (attr == "lastname") {
+//          $(this).text(user.lastname);
+//        } else if (attr == "id") {
+//          $(this).text(user.id);
+//        } else {
+//          $(this).text(user.email);
+//        }
+//      });
+
+        $("#showResponseTable").find("tr:not(:first)").remove();
+
+        $("#showResponseTable").append(`
+              <tr id="user-${user.id}">
+                  <td class="userId" name="idres">${user.id}</td>
+                  <td class="userUserName" name="usernameres">${user.username}</td>
+                  <td class="userFirstName" name="firstnameres">${user.firstname}</td>
+                  <td class="userLastName" name="lastnameres">${user.lastname}</td>
+                  <td class="userEmail" name="emailres">${user.email}</td>
+              </tr>
+          `);
+
+
+
+}
+
+
+// ajax function call to display the user detials of the requested user
+$("form#getUser").submit(function() {
+  var id = $('input[name="formId1"]').val().trim();
+  if (id) {
+    $.ajax({
+        url: '{% url "crud_ajax_show" %}',
+        data: {
+            'id': id,
+        },
+        dataType: 'json',
+        success: function (data) {
+
+            $("#showResponseTable").find("tr:not(:first)").remove();
+
+            $("#showResponseTable").append(`
+                  <tr id="user-${data.user.id}">
+                      <td class="userId" name="idres">${data.user.id}</td>
+                      <td class="userUserName" name="usernameres">${data.user.username}</td>
+                      <td class="userFirstName" name="firstnameres">${data.user.firstname}</td>
+                      <td class="userLastName" name="lastnameres">${data.user.lastname}</td>
+                      <td class="userEmail" name="emailres">${data.user.email}</td>
+                  </tr>
+              `);
+            $('#showResponseTable').show();
+
+        }
+    });
+  } else{
+    alert("All fields must have a valid value.");
+  }
+  $('form#getUser').trigger("reset");
+  return false;
+});
+
+// ajax function call to delete the user details of the requested user 
+$("form#deleteUser").submit(function() {
+  var id = $('input[name="formId2"]').val().trim();
+  var action = confirm("Are you sure you want to delete this user?");
+  if (action != false) {
+    $.ajax({
+        url: '{% url "crud_ajax_delete" %}',
+        data: {
+            'id': id,
+        },
+        dataType: 'json',
+        success: function (data) {
+            if (data.deleted) {
+              $("#userTable #user-" + id).remove();
+              //$('#userTable').show();
+
+              $("#showResponseTable").find("tr:not(:first)").remove();
+
+              $("#showResponseTable").append(`
+                    <tr id="user-${data.user.id}">
+                        <td class="userId" name="idres">${data.user.id}</td>
+                        <td class="userUserName" name="usernameres">${data.user.username}</td>
+                        <td class="userFirstName" name="firstnameres">${data.user.firstname}</td>
+                        <td class="userLastName" name="lastnameres">${data.user.lastname}</td>
+                        <td class="userEmail" name="emailres">${data.user.email}</td>
+                    </tr>
+                `);
+              $('#showResponseTable').show();
+
+
+            }
+        }
+    });
+  } else{
+    alert("All fields must have a valid value.");
+  }
+  $('form#deleteUser').trigger("reset");
+  return false;
+});
+
+
+</script>
+{% endblock javascript %}
